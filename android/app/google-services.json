@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "480454085596",
+    "project_id": "timetree-c5cb7",
+    "storage_bucket": "timetree-c5cb7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480454085596:android:0837708e6d0a4d09e79d19",
+        "android_client_info": {
+          "package_name": "com.example.timetree1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTZCfbd7Q7yeSdt18JDqOJZ6vohMXE1Ro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

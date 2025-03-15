@@ -1,0 +1,2 @@
+C:/Users/vikra/projects/timetree1/android/app/.cxx/Debug/624r1g19/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/vikra/projects/timetree1/android/app/.cxx/Debug/624r1g19/armeabi-v7a/CMakeFiles/rebuild_cache.dir
