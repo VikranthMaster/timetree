@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:timetree1/pages/chat.dart';
+import 'package:timetree1/pages/user_list.dart';
 
 class CreateRoom extends StatefulWidget {
   final int roomCode1;
@@ -10,13 +12,45 @@ class CreateRoom extends StatefulWidget {
   State<CreateRoom> createState() => _CreateRoomState();
 }
 
-class _CreateRoomState extends State<CreateRoom> {
+class _CreateRoomState extends State<CreateRoom> with WidgetsBindingObserver {
   final CountDownController _controller = CountDownController();
   final TextEditingController _mins = TextEditingController();
   final TextEditingController _sec = TextEditingController();
 
   int _duration = 0;
   bool _isTimerRunning = false;
+  bool _wasPausedManually = false;
+  bool _isFirstResume = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused && _isTimerRunning) {
+      _wasPausedManually = true;
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_isFirstResume && _wasPausedManually && _isTimerRunning) {
+        // Only show this if the app was paused, not freshly started
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("You returned to the app while the timer is running"),
+          ),
+        );
+      }
+      _wasPausedManually = false;
+      _isFirstResume = false; // now treat future resumes as true resumes
+    }
+  }
 
   Future<void> removeRoom(int code) async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -46,22 +80,24 @@ class _CreateRoomState extends State<CreateRoom> {
     }
   }
 
-  Future<bool> _onWillPop() async {
-    if (_isTimerRunning) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Can't go back while timer is running")),
-      );
-      return false;
-    } else {
-      await removeRoom(widget.roomCode1);
-      return true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          if (!_isTimerRunning) {
+            await removeRoom(widget.roomCode1);
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Can't leave while timer is running"),
+              ),
+            );
+          }
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Room'),
@@ -74,7 +110,8 @@ class _CreateRoomState extends State<CreateRoom> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text("Can't leave while timer is running")),
+                    content: Text("Can't leave while timer is running"),
+                  ),
                 );
               }
             },
@@ -82,10 +119,29 @@ class _CreateRoomState extends State<CreateRoom> {
           ),
           actions: [
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        UserList(code3: widget.roomCode1.toString()),
+                  ),
+                );
+              },
               icon: const Icon(Icons.person),
               padding: const EdgeInsets.all(15),
             ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ChatScreen(roomCode: (widget.roomCode1).toString()),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.chat),
+              tooltip: 'Open chat',
+            )
           ],
         ),
         body: Column(

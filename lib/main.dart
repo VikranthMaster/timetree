@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:lottie/lottie.dart';
@@ -7,6 +8,9 @@ import 'package:timetree1/pages/join_room.dart';
 import 'dart:math';
 import 'firebase_options.dart';
 import 'pages/create_room.dart';
+import 'pages/login_page.dart';
+import 'pages/register_room.dart';
+import 'pages/check.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,19 +32,19 @@ class MyApp extends StatelessWidget {
           surface: const Color(0xFFD4E6C3),
         ),
       ),
-      home: const MyHomePage(),
+      home: const CheckPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class Main extends StatefulWidget {
+  const Main({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Main> createState() => _MainState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MainState extends State<Main> {
   final _roomCode = TextEditingController();
 
   Future addRoom(int roomId) async {
@@ -96,95 +100,58 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(height: 250),
-          Center(
-            child: Lottie.asset(
-              'lotties/plant.json',
-              width: 300,
-              height: 300,
-            ),
-          ),
-          Center(
-            child: Text(
-              'TimeTree',
-              style: GoogleFonts.poppins(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF4A5568),
+      appBar: AppBar(
+        title: Text("FIRST PAGE"),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+      ),
+      body: Transform.translate(
+        offset: const Offset(0, -135),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 250),
+            Center(
+              child: Lottie.asset(
+                'lotties/plant.json',
+                width: 300,
+                height: 300,
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              final roomId = generateDigit();
-              try {
-                addRoom(roomId);
+            Center(
+              child: Text(
+                'TimeTree',
+                style: GoogleFonts.poppins(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF4A5568),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => CreateRoom(
-                      roomCode1: roomId,
-                    ),
+                    builder: (context) => LoginPage(),
                   ),
                 );
-              } catch (e) {
-                print("Error");
-              }
-            },
-            child: const Text("CREATE ROOM"),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Enter Room ID"),
-                  content: TextField(
-                    controller: _roomCode,
-                    decoration: const InputDecoration(hintText: "Room ID"),
+              },
+              child: const Text("LOGIN"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => RegisterPage(),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        final code = int.parse(_roomCode.text);
-                        getRoomByCode(code).then((value) {
-                          if (value == 1) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => JoinRoom(
-                                  roomCode2: code,
-                                ),
-                              ),
-                            );
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (_) => const AlertDialog(
-                                title: Text("Invalid Room ID"),
-                                content: Text("Please enter a valid room ID."),
-                              ),
-                            );
-                          }
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: const Text("JOIN"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("CANCEL"),
-                    ),
-                  ],
-                ),
-              );
-            },
-            child: const Text("JOIN ROOM"),
-          ),
-        ],
+                );
+              },
+              child: const Text("REGISTER"),
+            ),
+          ],
+        ),
       ),
     );
   }
